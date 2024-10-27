@@ -2,7 +2,7 @@ import { ActivityFactor } from "../../const";
 import { bot } from "../../lib/Bot";
 import { caloriesMaintain, capitalizeFirstLetter, getWeightDB, withHTMLmarkdown } from "../../lib/utils";
 import { Command } from "../../types";
-import { Menu } from "@grammyjs/menu";
+import { Menu, MenuRange } from "@grammyjs/menu";
 
 
 const menu = new Menu("activity-options");
@@ -18,18 +18,24 @@ export const cmd: Command = {
         const calor = caloriesMaintain(e.weight, e.height, e.age, e.sex)
         let currentActivity: keyof typeof ActivityFactor = "sedentary";
 
-        for (const i of Object.keys(ActivityFactor)) {
-            menu.text(() => `${currentActivity == i ? '✅ ' : ''}${capitalizeFirstLetter(i)}`, ctx => {
-                currentActivity = i as keyof typeof ActivityFactor;
+        menu.dynamic(() => {
+            const range = new MenuRange()
+            for (const i of Object.keys(ActivityFactor)) {
+                range.text(() => `${currentActivity == i ? '✅ ' : ''}${capitalizeFirstLetter(i)}`, async ctx => {
+                    currentActivity = i as keyof typeof ActivityFactor;
 
-                const updatedCalor = caloriesMaintain(e.weight, e.height, e.age, e.sex, i as keyof typeof ActivityFactor)
-                ctx.editMessageText("Here's an updated amount of calories according to your amount of activity!\n" +
-                    `Maintain weight: <b>${updatedCalor.maintain}</b> cal\n` +
-                    `Weight loss: <b>${updatedCalor.loss}</b> cal\n`,
-                    withHTMLmarkdown()
-                )
-            })
-        }
+                    const updatedCalor = caloriesMaintain(e.weight, e.height, e.age, e.sex, i as keyof typeof ActivityFactor)
+                    await ctx.editMessageText("Here's an updated amount of calories according to your amount of activity!\n" +
+                        `Maintain weight: <b>${updatedCalor.maintain}</b> cal\n` +
+                        `Weight loss: <b>${updatedCalor.loss}</b> cal\n`,
+                        withHTMLmarkdown()
+                    )
+                })
+            }
+            range.row()
+            range.text("Close", c => c.menu.close())
+            return range
+        })
 
         await ctx.reply("Here's how many calories you need to:\n" +
             `Maintain weight: <b>${calor.maintain}</b> cal\n` +
