@@ -68,6 +68,7 @@ async function setup(conv: Conv, ctx: Ctx) {
         }
 
         userdata.timezone = timezone.msg.text
+        userdata.didCountTheirWeightToday = true;
 
         userdata.date = await conv.now()
         const BMI = BMIcalculator(weight, height);
