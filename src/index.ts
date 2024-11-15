@@ -45,9 +45,9 @@ async function sendWeight(conv: Conv, ctx: Ctx) {
         await ctx.reply("You already saved your weight this week!")
         return
     }
-    await ctx.reply("Please input your weight in kilograms.")
+    await ctx.reply("Please input your weight in kilograms. (Eg. 80.1 or 80)")
 
-    const weight = await conv.form.int()
+    const weight = await conv.form.number()
     const oldWeight = userdata.weight;
 
     if (weight > oldWeight + 10 || weight < oldWeight - 10) {
